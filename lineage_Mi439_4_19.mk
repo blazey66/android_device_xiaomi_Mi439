@@ -12,6 +12,14 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/product_launched_with_p.mk)
 # Inherit some common LineageOS stuff.
 $(call inherit-product, vendor/lineage/config/common_full_phone.mk)
 
+# crDroid
+TARGET_DISABLE_MATLOG := true
+TARGET_SUPPORTS_QUICK_TAP := false
+TARGET_FACE_UNLOCK_SUPPORTED := true
+TARGET_DISABLE_LINEAGE_SDK := true
+PRODUCT_NO_CAMERA := true
+TARGET_EXCLUDES_AUDIOFX := true
+
 # Kernel
 TARGET_KERNEL_VERSION := 4.19
 
