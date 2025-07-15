@@ -113,6 +113,13 @@ PRODUCT_SOONG_NAMESPACES += \
 # Inherit from vendor blobs
 $(call inherit-product, vendor/xiaomi/Mi439/Mi439-vendor.mk)
 
+# GrapheneCam
+ifeq ($(USE_GRAPHENEOS_CAM), true)
+PRODUCT_PACKAGES += \
+    GrapheneOSCamera \
+    GrapheneFrameworks
+endif
+
 # EXTRA: MiuiCamera
 ifneq ($(wildcard vendor/miuicamera/config.mk),)
 #$(call inherit-product, vendor/miuicamera/config.mk)
