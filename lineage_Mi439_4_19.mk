@@ -12,6 +12,8 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/product_launched_with_p.mk)
 # Inherit some common LineageOS stuff.
 $(call inherit-product, vendor/lineage/config/common_full_phone.mk)
 
+TARGET_EXCLUDES_AUDIOFX := true
+
 # Kernel
 TARGET_KERNEL_VERSION := 4.19
 
