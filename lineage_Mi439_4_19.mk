@@ -14,11 +14,8 @@ $(call inherit-product, vendor/lineage/config/common_full_phone.mk)
 
 # crDroid
 TARGET_DISABLE_MATLOG := true
-TARGET_SUPPORTS_QUICK_TAP := false
 TARGET_FACE_UNLOCK_SUPPORTED := true
-TARGET_DISABLE_LINEAGE_SDK := true
 PRODUCT_NO_CAMERA := true
-TARGET_EXCLUDES_AUDIOFX := true
 USE_GRAPHENEOS_CAM := true
 TARGET_DISABLE_EPPE := true
 
