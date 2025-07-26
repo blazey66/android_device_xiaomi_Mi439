@@ -3,29 +3,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-
-# Kernel
-ifeq ($(TARGET_KERNEL_VERSION),4.9)
-    ifneq ($(wildcard kernel/xiaomi/sdm439/Makefile),)
-        TARGET_KERNEL_SOURCE := kernel/xiaomi/sdm439
-        ifneq ($(wildcard $(TARGET_KERNEL_SOURCE)/arch/arm64/configs/lineageos_mi439_defconfig),)
-            $(warning Using official lineageos kernel)
-            TARGET_KERNEL_CONFIG := lineageos_mi439_defconfig
-        else ifneq ($(wildcard $(TARGET_KERNEL_SOURCE)/arch/arm64/configs/mi439-perf_defconfig),)
-            $(warning Using mi-sdm439 kernel)
-            TARGET_KERNEL_CONFIG := mi439-perf_defconfig
-        else
-            $(warning Fallback to use Mi-Thorium kernel)
-            TARGET_USES_MITHORIUM_KERNEL := true
-        endif
-    else
-        $(warning Using Mi-Thorium kernel)
-        TARGET_USES_MITHORIUM_KERNEL := true
-    endif
-else
-    TARGET_USES_MITHORIUM_KERNEL := true
-endif
-
 # Partitions
 SSI_PARTITIONS := product system system_ext
 TREBLE_PARTITIONS := odm vendor
@@ -70,21 +47,26 @@ DEVICE_MANIFEST_FILE += $(DEVICE_PATH)/manifest.xml
 $(call soong_config_set,libinit,vendor_init_lib,//$(DEVICE_PATH):init_xiaomi_mi439)
 
 # Kernel
+BOARD_KERNEL_BASE := 0x80000000
+BOARD_KERNEL_CMDLINE := androidboot.hardware=qcom msm_rtb.filter=0x237 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 androidboot.bootdevice=7824900.sdhci loop.max_part=7
+BOARD_KERNEL_CMDLINE += androidboot.init_fatal_reboot_target=recovery printk.devkmsg=on
+BOARD_KERNEL_CMDLINE += console=ttyMSM0,115200,n8 androidboot.console=ttyMSM0
+BOARD_KERNEL_CMDLINE += androidboot.android_dt_dir=/non-existent androidboot.boot_devices=soc/7824900.sdhci
 BOARD_BOOTIMG_HEADER_VERSION := 1
 BOARD_MKBOOTIMG_ARGS += --header_version $(BOARD_BOOTIMG_HEADER_VERSION)
-BOARD_KERNEL_CMDLINE += androidboot.android_dt_dir=/non-existent androidboot.boot_devices=soc/7824900.sdhci
+BOARD_MKBOOTIMG_ARGS := --ramdisk_offset 0x01000000 --tags_offset 0x00000100
+BOARD_KERNEL_IMAGE_NAME := Image.gz-dtb
+BOARD_KERNEL_PAGESIZE :=  2048
 BOARD_KERNEL_SEPARATED_DTBO := true
 TARGET_KERNEL_ARCH := arm64
-
-ifeq ($(TARGET_USES_MITHORIUM_KERNEL),true)
-TARGET_KERNEL_CONFIG += vendor/xiaomi/sdm439/mi439.config
-TARGET_KERNEL_RECOVERY_CONFIG += vendor/xiaomi/sdm439/mi439.config
-endif
-
-ifeq ($(TARGET_KERNEL_VERSION),4.19)
-TARGET_KERNEL_CONFIG += vendor/msm-clk.config
-TARGET_KERNEL_RECOVERY_CONFIG += vendor/msm-clk.config
-endif
+TARGET_KERNEL_CONFIG := \
+    vendor/msm8937-perf_defconfig \
+    vendor/xiaomi-sdm439.config
+KERNEL_LLVM_SUPPORT := true
+KERNEL_CUSTOM_LLVM := true
+KERNEL_SD_LLVM_SUPPORT := false
+TARGET_KERNEL_ADDITIONAL_FLAGS := LLVM=1 LLVM_IAS=1
+TARGET_KERNEL_SOURCE := kernel/xiaomi/sdm439
 
 # Partitions
 BOARD_USES_METADATA_PARTITION := true
@@ -134,11 +116,7 @@ TARGET_VENDOR_PROP += $(DEVICE_PATH)/vendor.prop
 
 # Recovery
 BOARD_INCLUDE_RECOVERY_DTBO := true
-ifeq ($(TARGET_KERNEL_VERSION),4.19)
 TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/rootdir/etc/fstab_4_19.qcom
-else
-TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/rootdir/etc/fstab_4_9.qcom
-endif
 
 # Releasetools
 TARGET_RELEASETOOLS_EXTENSIONS := $(DEVICE_PATH)
@@ -146,11 +124,7 @@ TARGET_RELEASETOOLS_EXTENSIONS := $(DEVICE_PATH)
 # Rootdir
 SOONG_CONFIG_NAMESPACES += XIAOMI_MI439_ROOTDIR
 SOONG_CONFIG_XIAOMI_MI439_ROOTDIR := KERNEL_VERSION
-ifeq ($(TARGET_KERNEL_VERSION),4.19)
 SOONG_CONFIG_XIAOMI_MI439_ROOTDIR_KERNEL_VERSION := k4_19
-else
-SOONG_CONFIG_XIAOMI_MI439_ROOTDIR_KERNEL_VERSION := k4_9
-endif
 
 # Security patch level
 VENDOR_SECURITY_PATCH := $(PLATFORM_SECURITY_PATCH)
